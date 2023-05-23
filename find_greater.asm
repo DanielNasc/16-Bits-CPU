@@ -5,30 +5,31 @@
 .text
 .globl main
 main:
-    la 	 $t0, 	vetor       	# carrega o endereço base do vetor em $t0
-    lw 	 $t1, 	tamanho     	# carrega o tamanho do vetor em $t1
-    addi $t1, 	$t1, 	-1   	# subtrai 1 do tamanho para obter o índice máximo
+    la 	 vetor       	# carrega o endereço base do vetor em $R1
+    mova R1
+    lwa 	 tamanho     	# carrega o tamanho do vetor em R2
+    mova R2
+    addi R2, 	-1   	# subtrai 1 do tamanho para obter o índice máximo
 
-    lw 	 $t2, 	($t0)      	# carrega o primeiro elemento do vetor em $t2 (maior valor inicial)
-    addi $t0, 	$t0, 	4    	# avança para o próximo elemento do vetor
+    lw 	0($R1)      	# carrega o primeiro elemento do vetor em $R3 (maior valor inicial)
+    mova R3
+    addi $R1, 	4    	# avança para o próximo elemento do vetor
 loop:
-    beqz $t1,  	end       	# se o tamanho for zero, termina o loop
-    lw 	 $t3, 	0($t0)      	# carrega o próximo elemento do vetor em $t3
+    move A R2
+    cmpi  0
+    beq	end       	# se o tamanho for zero, termina o loop
+    lw 	0($R1)      	# carrega o próximo elemento do vetor em $R4
+    mova R4
 
-    slt  $t4, 	$t3, 	$t2   	# compara se $t3 é menor que $t2
-    bnez $t4, 	not_greater	# se $t3 não for maior que $t2, pula para not_greater
-    move $t2, 	$t3       	# se $t3 for maior que $t2, atualiza o valor máximo
+    move A R3
+    cmp  R4   # seta carry flag se A >= R4
+    bcc not_greater	# se $R4 não for maior que $R3, pula para not_greater
+    move R3, 	R4       	# se $R4 for maior que $R3, atualiza o valor máximo
 
 not_greater:
-    addi $t0, 	$t0, 	4    	# avança para o próximo elemento do vetor
-    addi $t1, 	$t1, 	-1   	# decrementa o tamanho
+    addi 	R1, 	4    	# avança para o próximo elemento do vetor
+    addi 	R2, 	-1   	# decrementa o tamanho
     j 	 loop              	# retorna para o início do loop
 
 end:
-    # O valor máximo estará em $t2
-    li 	 $v0, 	1           	# código de syscall para imprimir inteiro
-    move $a0,	$t2       	# move o valor máximo para o registrador de argumento $a0
-    syscall             	# chama a syscall
-
-    li 	 $v0, 	10          	# código de syscall para sair do programa
-    syscall            		# chama a syscall
+   rts
