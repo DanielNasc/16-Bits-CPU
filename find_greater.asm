@@ -17,7 +17,7 @@ main:
 loop:
     move A R2
     cmpi  0
-    beq	end       	# se o tamanho for zero, termina o loop
+    yibi  end       	# se o tamanho for zero, termina o loop
     lw 	0($R1)      	# carrega o próximo elemento do vetor em $R4
     mova R4
 
