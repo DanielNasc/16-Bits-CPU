@@ -1,13 +1,20 @@
+import re
+
+from math import pow
+
 class Assembler:
     context = None
     program = ""
 
     ints = ["lj," "lw", "ld", "jd", "jc", "dl", "jci", "geb",
             "ggb","yibi", "migs", "yabi", "i", "d"]
-    dtypes = ["word"]
+    dtypes = [".word"]
 
-    varMetadata = {}
+    labelsAddress = {}
     RAMmemory = []
+
+    DEC_REG=r"^[0-9]+$"
+    HEX_REG=r"^0x[0-9A-Fa-f]+$"
 
     def __init__(self) -> None:
         pass
@@ -27,7 +34,9 @@ class Assembler:
 
     def handle_line(self, line):
         line = line.strip()
-        if (len(line) == 0): return
+
+        if (len(line) == 0): 
+            return
 
         # new context definition
         if (line[0] == "."):
@@ -54,15 +63,22 @@ class Assembler:
         for value in values:
             if (not self.check_type(value, tokens[1])):
                 raise Exception("wrong type \"" + value + "\" in " + str(tokens) + " not " + tokens[1])
+            
+        data_addr = len(self.RAMmemory)
+        
+        self.labelsAddress[tokens[0][:-1]] = data_addr
+
+        for token in tokens[2:]:
+            self.convert_data_to_memory(token, tokens[1])
 
     
     def check_type(self, value, type):
-        try:
-            if (type == "word"):
-                int(value)
-            return True
-        except ValueError:
-            return False
+        if (type == ".word"):
+            return (re.match(self.DEC_REG, value)
+                    or re.match(self.HEX_REG, value)# hexadecimal
+                )
+
+        return True
 
 
     def handle_insts(self, line):
@@ -72,7 +88,24 @@ class Assembler:
             or (tokens[0][0] != "." and tokens[0] not in self.ints)
         ):
             raise Exception("Wrong syntax:: inst")
-        
+    
+    def convert_data_to_memory(self, value, type):
+        converted_value = self.convert_value(value, type)
+
+        if (converted_value > pow(2, 15) - 1
+            or converted_value < -pow(2, 15)):
+            raise Exception(converted_value + " cant be represent in 16 bits")
+
+        self.RAMmemory.append(hex(converted_value)[2:])
+
+    def convert_value(self, value, type):
+        if type == ".word":
+            if re.match(self.DEC_REG, value):
+                return int(value)
+            elif re.match(self.HEX_REG, value):
+                return int(value, base=16)
+        return 0
+
 
     def change_context(self, new_ctx):
         self.context = new_ctx
@@ -82,3 +115,5 @@ class Assembler:
 if __name__ == "__main__":
     assembler = Assembler()
     assembler.execute("Bangtan.asm")
+    print(assembler.labelsAddress)
+    print(assembler.RAMmemory)
