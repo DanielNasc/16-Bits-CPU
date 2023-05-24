@@ -64,7 +64,7 @@ class Assembler:
             if (not self.check_type(value, tokens[1])):
                 raise Exception("wrong type \"" + value + "\" in " + str(tokens) + " not " + tokens[1])
             
-        data_addr = len(self.RAMmemory)
+        data_addr = self.ram_size()
         
         self.labelsAddress[tokens[0][:-1]] = data_addr
 
@@ -88,7 +88,7 @@ class Assembler:
             or (tokens[0][0] != "." and tokens[0] not in self.ints)
         ):
             raise Exception("Wrong syntax:: inst")
-    
+        
     def convert_data_to_memory(self, value, type):
         converted_value = self.convert_value(value, type)
 
@@ -96,7 +96,7 @@ class Assembler:
             or converted_value < -pow(2, 15)):
             raise Exception(converted_value + " cant be represent in 16 bits")
 
-        self.RAMmemory.append(hex(converted_value)[2:])
+        self.save_value(converted_value)
 
     def convert_value(self, value, type):
         if type == ".word":
@@ -111,6 +111,12 @@ class Assembler:
         self.context = new_ctx
         print("New Context >>", new_ctx)
 
+
+    def save_value(self, value):
+        self.RAMmemory.append((hex(value)[2:]).zfill(2))
+    
+    def ram_size(self):
+        return len(self.RAMmemory)
 
 if __name__ == "__main__":
     assembler = Assembler()
