@@ -6,21 +6,27 @@ class Assembler:
     context = None
     program = ""
 
-    ints = ["lj," "lw", "ld", "jd", "jc", "dl", "jci", "geb",
-            "ggb","yibi", "migs", "yabi", "i", "d"]
+    insts = ["lj", "lw", "ld", "jd", "jc", "dl", "jci", "geb",
+            "ggb","yibi", "migs", "yabi", "i", "d", "ia", "lda",
+            "cmp", "cmpi"]
+
+    chu_insts = ["lr", "jd", "jc", "dl", "i", "geu", "ton"]
     dtypes = [".word"]
+    registers = ["$rm", *["$jn" + str(x) for x in range(0, 5+1)], "$jm", "$iu"]
 
     labelsAddress = {}
     RAMmemory = []
 
     DEC_REG=r"^[0-9]+$"
     HEX_REG=r"^0x[0-9A-Fa-f]+$"
+    TAB_REG=r"\t+"
 
     def __init__(self) -> None:
         pass
 
     def execute(self, file):
         f = open(file, "r")
+        print(self.registers)
 
         for line in f:
             self.handle_line(line)
@@ -46,7 +52,7 @@ class Assembler:
         elif (self.context == "data"):
             self.handle_data(line)
         # read instructions
-        elif (self.context == "inst"):
+        elif (self.context == "text"):
             self.handle_insts(line)
     
     def handle_data(self, line):
@@ -82,12 +88,49 @@ class Assembler:
 
 
     def handle_insts(self, line):
-        tokens = line.split(" ")
+        line = re.sub(self.TAB_REG, " ", line)
+        tokens = list(filter(None, line.split(" ")))
+        is_label = tokens[0][len(tokens[0]) - 1] == ":"
 
-        if (len(tokens) < 2
-            or (tokens[0][0] != "." and tokens[0] not in self.ints)
-        ):
-            raise Exception("Wrong syntax:: inst")
+        if ((not is_label and tokens[0] not in self.insts)):
+            raise Exception("Wrong syntax:: inst " + str(tokens[0]) )
+        
+        if (not is_label):
+            try:
+                self.save_inst(*tokens)
+            except:
+                print("erro: ", tokens)
+                exit(1)
+
+    def save_inst(self, inst, arg1=None, arg2=None, arg3=None):
+        if (inst in self.chu_insts):
+            self.save_chu_inst(inst, arg1, arg2, arg3)
+
+    def save_chu_inst(self, inst, r1, r2, immediate):
+        opcode = self.get_opcode(inst)
+
+        inst_word = opcode << 3
+        inst_word += self.get_register(r1)
+        inst_word = inst_word << 3
+        inst_word += self.get_register(r2)
+        inst_word = inst_word << 4
+        inst_word += int(immediate if immediate else '0')
+        
+        first_part_inst = (inst_word & 0xFF00) >> 8
+        second_part_inst = (inst_word & 0x00FF)
+
+        self.save_value(first_part_inst)
+        self.save_value(second_part_inst)
+
+        print("Inst: ", inst, r1, r2, immediate, ">>",inst_word)
+
+
+    def get_opcode(self, inst):
+        return 0b111111
+    
+    def get_register(self, register):
+        return 0b011
+        
         
     def convert_data_to_memory(self, value, type):
         converted_value = self.convert_value(value, type)
