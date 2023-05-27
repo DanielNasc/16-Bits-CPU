@@ -26,6 +26,8 @@ OPCODES ={
 class RamMemory:
     labelsAddress = {}
     RAMmemory = []
+    hex_mem = []
+    word_size = 2 # bytes
 
     def save_label(self, label):
         data_addr = self.size()
@@ -33,7 +35,6 @@ class RamMemory:
         self.labelsAddress[label] = data_addr
 
     def save(self, value):
-        # self.RAMmemory.append((hex(value)[2:]).zfill(2))
         self.RAMmemory.append(value)
     
     def size(self):
@@ -43,7 +44,13 @@ class RamMemory:
         return self.labelsAddress[label]
 
     def convert_labels(self):
-        pass
+        for word_arr in self.RAMmemory:
+            word = word_arr[0]
+            if len(word_arr) > 1:
+                label_addr = self.get_label_index(word_arr[1])
+                label_addr = label_addr << self.word_size - 1
+                word += label_addr
+            self.hex_mem.append((hex(word)[2:]).zfill(2))
 
 class Assembler:
     section = None
@@ -57,7 +64,7 @@ class Assembler:
     insts     = chu_insts + deol_insts + jeon_insts
     
     dtypes = [".word"]
-    registers = ["$rm", *["$jn" + str(x) for x in range(0, 5+1)], "$jm", "$iu"]
+    registers = ["$rm", *["$jn" + str(x) for x in range(0, 4+1)], "$jm", "$iu"]
 
     DEC_REG=r"^[0-9]+$"
     HEX_REG=r"^0x[0-9A-Fa-f]+$"
@@ -72,6 +79,8 @@ class Assembler:
 
         for line in f:
             self.handle_line(line)
+        
+        self.RAM.convert_labels()
 
         f.close()
 
@@ -167,7 +176,7 @@ class Assembler:
         # self.RAM.save(first_part_inst)
         # self.RAM.save(second_part_inst)
 
-        print("Chu-Inst: ", inst, r1, r2, immediate, ">>", inst_word)
+        print("Chu-Inst: ", inst, r1, r2, immediate, ">>", bin(inst_word))
 
     def save_deol_inst(self, inst, immediate_r1):
         opcode = self.get_opcode(inst)
@@ -188,7 +197,7 @@ class Assembler:
 
         self.RAM.save([inst_word])
 
-        print("Deol-Inst: ", inst, r1, immediate, ">>", inst_word)
+        print("Deol-Inst: ", inst, r1, immediate, ">>", bin(inst_word))
 
     def save_jeon_inst(self, inst, immediate: str):
         opcode = self.get_opcode(inst)
@@ -198,6 +207,7 @@ class Assembler:
             inst_word += int(immediate)
             self.RAM.save([inst_word])
         else:
+            self.RAM.save_label(immediate)
             self.RAM.save([inst_word, immediate])
             # label_i = self.RAM.get_label_index(immediate)
             # inst_word += (label_i << 1)
@@ -209,7 +219,7 @@ class Assembler:
         # self.RAM.save(second_part_inst)
 
 
-        print("Jeon-Inst: ", inst, immediate, ">>", inst_word)
+        print("Jeon-Inst: ", inst, immediate, ">>", bin(inst_word))
 
     def get_opcode(self, inst):
         return 0b111111
@@ -247,6 +257,7 @@ if __name__ == "__main__":
     assembler.execute("Bangtan.asm")
     print(assembler.RAM.labelsAddress)
     print(assembler.RAM.RAMmemory)
+    print(assembler.RAM.hex_mem)
     # for byte in assembler.RAM.RAMmemory:
         # print(bin(int(byte, 16)).zfill(8))
         # print(byte)
