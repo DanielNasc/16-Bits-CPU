@@ -4,15 +4,15 @@
 
 .text
 main:
-    lj 	vetor       
+    lja 	vetor       
     ia  $jn0
     lda tamanho     
     ia  $jn1
-    jc  $jn1 -1   	   
+    jci  $jn1 -1   	   
 
     ld 	0($jn0)      
     ia $jn2
-    jc $jn0 4    	   
+    jci $jn0 4    	   
 loop:
     i   $iu  $jn1
     cmpi    0
@@ -26,8 +26,8 @@ loop:
     i   $jn2 $jn3       
 
 not_greater:
-    jc 	$jn0 4    	   
-    jc 	$jn1 -1   	   
+    jci 	$jn0 4    	   
+    jci 	$jn1 -1   	   
     d 	loop           
 
 end:
