@@ -27,7 +27,6 @@ class RamMemory:
     labelsAddress = {}
     RAMmemory = []
     hex_mem = []
-    word_size = 2 # bytes
 
     def save_label(self, label):
         data_addr = self.size()
@@ -48,9 +47,17 @@ class RamMemory:
             word = word_arr[0]
             if len(word_arr) > 1:
                 label_addr = self.get_label_index(word_arr[1])
-                label_addr = label_addr << self.word_size - 1
+                label_addr = label_addr << 1
                 word += label_addr
-            self.hex_mem.append((hex(word)[2:]).zfill(2))
+            self.hex_mem.append((hex(word)[2:]).zfill(4))
+
+    def save_RAM_content(self, file):
+        f = open(file, "w")
+        f.write("v2.0 raw\n")
+        for word in self.hex_mem:
+            f.write(word + " ")
+        f.close()
+
 
 class Assembler:
     section = None
@@ -84,10 +91,9 @@ class Assembler:
 
         f.close()
 
-        mem_file = open("outRAM.mem", "w")
+        self.RAM.save_RAM_content("out.mem")
 
 
-        mem_file.close()
 
     def handle_line(self, line):
         line = line.strip()
