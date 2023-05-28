@@ -1,35 +1,7 @@
 import re
 
 from math import pow
-
-# 6 bits for opcode
-OPCODES ={
-    "lj": 0b000000,
-    "lja": 0b000001,
-    "lw": 0b000010,
-    "ld": 0b000011,
-    "ldi": 0b000100,
-    "la": 0b000101,
-    "jd": 0b000110,
-    "ja": 0b000111,
-    "jai": 0b001000,
-    "jc": 0b001001,
-    "jci": 0b001010,
-    "dl": 0b001011,
-    "dli": 0b001100,
-    "g": 0b001101,
-    "geb": 0b001110,
-    "yibi": 0b001111,
-    "yabi": 0b010000,
-    "jci": 0b010001,
-    "i": 0,
-    "d": 0,
-    "ia": 0,
-    "lda": 0,
-    "cmp": 0,
-    "cmpi": 0
-}
-
+    
 class ROMMemory:
     labelsValues = {}
     ROMmemory = []
@@ -77,7 +49,24 @@ class Assembler:
     deol_insts= ["lj", "ia", "dli", "ldi" "la", "jci", "dli", "ja", "dli", "dr", "cmp", "yibi", "yabi",]
     jeon_insts= ["lja", "kk", "lad", "lal","lj0", "lj1", "sal", "sj0", "sj1", "ldj0", "jai", "g","geb", "d", "dal", "cmpi", "lda", "end"]
     insts     = chu_insts + deol_insts + jeon_insts
-    
+
+    OPCODES = {
+    "lja": 0b000001,
+    "sal": 0b000010,
+    "lal": 0b000011,
+    "llj": 0b000100,
+    "sj0": 0b000101,
+    "jci": 0b000110,
+    "lj0": 0b000111,
+    "yabi": 0b001000,
+    "lj1": 0b001001,
+    "kk": 0b001010,
+    "cmp": 0b001011,
+    "geb": 0b001100,
+    "dli": 0b001101,
+    "d": 0b001110,
+    "end": 0b001111
+}
     dtypes = [".word"]
     registers = ["$rm", *["$jn" + str(x) for x in range(0, 4+1)], "$jm", "$iu"]
 
@@ -244,7 +233,7 @@ class Assembler:
         print("Jeon-Inst: ", inst, immediate, ">>", bin(inst_word))
 
     def get_opcode(self, inst):
-        return 0b111111
+        return self.OPCODES[inst]
     
     def get_register(self, register):
         try:
@@ -279,6 +268,6 @@ if __name__ == "__main__":
     assembler.execute("Bangtan.asm")
     print(assembler.ROM.ROMmemory)
     # print(assembler.ROM.hex_mem)
-    for byte in assembler.ROM.hex_mem:
-        print(bin(int(byte, 16)).zfill(8))
-        print(byte)
+    for word in assembler.ROM.hex_mem:
+        print(bin(int(word, 16))[2:].zfill(8))
+        print(word)
