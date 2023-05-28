@@ -2,19 +2,26 @@ import re
 
 from math import pow
 
+# 6 bits for opcode
 OPCODES ={
-    "lj": 0b1, 
-    "lw": 0,
-    "ld": 0,
-    "jd": 0,
-    "jc": 0,
-    "dl": 0,
-    "jci": 0,
-    "geb": 0,
-    "ggb": 0,
-    "yibi": 0,
-    "migs": 0,
-    "yabi": 0,
+    "lj": 0b000000,
+    "lja": 0b000001,
+    "lw": 0b000010,
+    "ld": 0b000011,
+    "ldi": 0b000100,
+    "la": 0b000101,
+    "jd": 0b000110,
+    "ja": 0b000111,
+    "jai": 0b001000,
+    "jc": 0b001001,
+    "jci": 0b001010,
+    "dl": 0b001011,
+    "dli": 0b001100,
+    "g": 0b001101,
+    "geb": 0b001110,
+    "yibi": 0b001111,
+    "yabi": 0b010000,
+    "jci": 0b010001,
     "i": 0,
     "d": 0,
     "ia": 0,
@@ -61,7 +68,7 @@ class RamMemory:
 
 class Assembler:
     section = None
-    program = ""
+    variables = {}
 
     RAM=None
 
@@ -93,8 +100,6 @@ class Assembler:
 
         self.RAM.save_RAM_content("out.mem")
 
-
-
     def handle_line(self, line):
         line = line.strip()
 
@@ -111,6 +116,8 @@ class Assembler:
         # read instructions
         elif (self.section == "text"):
             self.handle_insts(line)
+        elif (self.section == "vars"):
+            self.handle_vars(line)
     
     def handle_data(self, line):
         tokens = line.split(" ")
@@ -138,7 +145,17 @@ class Assembler:
                     or re.match(self.HEX_REG, value)# hexadecimal
                 )
 
-        return True
+        return False
+    
+    def handle_vars(self, line):
+        line = re.sub(self.TAB_REG, " ", line)
+        tokens = list(filter(None, line.split(" ")))
+        
+        if len(tokens) != 3 or tokens[1] != "=" or not self.check_type(tokens[2], ".word"):
+            raise Exception("Correct syntax:: [Var name] = [Hex|Dec Value]")
+        
+        self.variables[tokens[0]] = self.convert_value(tokens[2], ".word")
+        
 
     def handle_insts(self, line):
         line = re.sub(self.TAB_REG, " ", line)
