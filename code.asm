@@ -1,27 +1,65 @@
-main:
-    la $t0, vetor      
-    lw $t1, tamanho    
-    addi $t1, $t1, -1  
+.data
+    ARRAY: .word 2 8 6 23 3 9 4
+    ARRAY_SIZE: .word 7
+.vars
+    REMAINING_AMOUNT          = 0000
+    GREATER_ADDRESS           = 0002 # Adress of the greater element in the ARRAY
+    CURRENT_VALUE_ADDR_ADRESS = 0004
+.text
+    # load address into accumulator
+    laa ARRAY
 
-    lw $t2, 4($t0)     
-    addi $t0, $t0, 4   
+   # load value from a address into a register
+    ldr $x $a # x = array[0]
+    # store register x into memory
+    stx GREATER_ADDRESS 
 
-loop:
-    beqz $t1, end      
-    lw $t3, 0($t0)     
+    # add immediate
+    addi $a 2 # next element address;  A = CURRENT_VALUE_ADDR_ADRESS + WORD_LEN
+    # store accumulator into memory
+    sta CURRENT_VALUE_ADDR_ADRESS
 
-    slt $t4, $t3, $t2  
-    beqz $t4, not_greater
-    move $t2, $t3      
+    # load value into accumulator
+    lda REMAINING_AMOUNT
+    # subtract immediate
+    subi $a 1
+    # store accumulator into memory
+    sta REMAINING_AMOUNT
 
-not_greater:
-    addi $t0, $t0, 4   
-    addi $t1, $t1, -1  
-    j loop             
-end:
+    loop:
+        # load value into x
+        ldx REMAINING_AMOUNT
+        # branch if equal zero
+        beqz $x end
 
-    li $v0, 1          
-    move $a0, $t2      
-    syscall            
-    li $v0, 10         
-    syscall            
+        # if Accumulator (GREATER) >= X (CURRENT), skip
+        # load value into accumulator
+        lda GREATER_ADDRESS
+        # load value into y register
+        ldy CURRENT_VALUE_ADDR_ADRESS # y = *CURRENT_VALUE_ADDR_ADRESS
+        # load value from a address into a register
+        ldr $x $y # x = VECTOR[I]
+        # compare a register with accumulator and set specific flags
+        cmp $x
+        # branch if carry clear 
+        bcc next
+
+        # store x value into memory
+        stx GREATER_ADDRESS
+    next:
+        # add immediate
+        addi $y 2 # A = CURRENT VALUE ADRESS + WORD_LEN
+        # store accumulator into memory
+        sta CURRENT_VALUE_ADDR_ADRESS
+
+        # load a value into accumulator
+        lda REMAINING_AMOUNT
+        # subtract immediate
+        subi $a 1
+        # store accumulator into memory
+        sta REMAINING_AMOUNT
+
+        # jump
+        j loop
+    end:
+        end

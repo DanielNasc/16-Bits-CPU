@@ -11,14 +11,18 @@
 8 registradores
 Os registradores são procedidos de $ nas instruções
 Duas formas de representação:
-Numero do registrador. $0 até $15
+Numero do registrador. $0 até $7
 Usando os nomes equivalentes (ver abaixo). Ex: $jn1, $iu
 | # do Reg. | Nome | Descrição |
 | :-------: | :--: | :-------: |
-| 0 | $rm | (values) das expressões de avaliação e resultados de funções.
-|1 ~ 5 | $jn0 - $jn5 | Variáveis temporárias. finais.
-| 6 | $v | (Return address) Retorna para o endereço.
-| 7 | $iu | (Accumulator) Registrador acumulador.
+| 0 | $zero | Sempre 0 |
+| 1 | $iu | Acumulador |
+| 2 | $jn0 | Registrador de uso geral |
+| 3 | $jn1 | Registrador de uso geral |
+| 4 | $sp | Stack Pointer |
+| 5 | $ps | Program Status |
+| 6 | $bj | Return Address |
+| 7 | $bb | Return Buffer |
 
 ### Declaração de Dados
 Seção do programa identificado pela diretiva .data
@@ -31,16 +35,22 @@ Contêm o código do programa (instruções).
 Ponto de inicio do código marcado pelo label main:
 O final da main deve usar a chamada de saída do sistema.
 
-### Instruções MIPS >>> Bangtan
+### Instruções MIPS/6502 >>> Bangtan
 
 | Nome da Instrução (MIPS) | Nome da Instrução (Bangtan) | Inspiração
 | :----------------------: | :-------------------------: | :--------: |
 | **la** (load address) | **lj** | lodeu juso
 | - | **lja** | -
-| **lw** (load word) | **ld** | lodeu dan-eo
-| **li** (load immediate) | **ldi** | -
+| **lw** (load word) | **ld** | lodeu dan-eo"
+| **lda** (load accumulator) | **lal** | lodeu A lejiseuteo
+| **ldx** (load register x) | **lj0** | lodeu JN0 lejiseuteo
+| **ldy** (load register jn1) | **lj1** | lodeu JN1 lejiseuteo
+| **ldr** (load from address in register) | **llj** | lejiseuteo lodeu juso
 | - (load from accumulator) | **la** | load into accumulator
 | **sw** (store word)| **jd** | jeojang dan-eo
+| **sta** (store accumulator) | **sal** | seuto-eo A lejiseuteo
+| **stx** (store register x) | **sj0** | seuto-eo JN0 lejiseuteo
+| **sty** (store register y) | **sj1** | seuto-eo JN1 lejiseuteo
 | - (store into accumulator) | **ja** | store into accumulator
 | - (store immediate into accumulator) | **jai** | store immediate into accumulator
 | **add** | **jc** | -
@@ -59,7 +69,8 @@ O final da main deve usar a chamada de saída do sistema.
 | **or** | **ton** | ttoneun
 | **nor** | **aton** | -
 | - | **cmp** | comparator
-| - | **cmpi** | comparator with immediate  
+| - | **cmpi** | comparator with immediate 
+| **clc** (clear carry) | **kk** | keullieo kaeli
 
 
 ### Leitura/Escrita
@@ -68,9 +79,9 @@ Todas outras instruções usam registradores como operando.
 
 #### Leitura/Escrita de endereçamento direto
 ##### Leitura:
-- `ld registrador, posição_da_RAM`
+- `ld registrador1, registrador2`
 
-copia word(2 bytes) da posição da RAM dada, para o registrador.
+copia word(2 bytes) da posição da RAM dada pelo registrador2, para o registrador1.
 - `ldi registrador, valor`
 
 carrega o valor para o registrador de destino.

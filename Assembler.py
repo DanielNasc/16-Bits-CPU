@@ -30,35 +30,37 @@ OPCODES ={
     "cmpi": 0
 }
 
-class RamMemory:
-    labelsAddress = {}
-    RAMmemory = []
+class ROMMemory:
+    labelsValues = {}
+    ROMmemory = []
     hex_mem = []
 
-    def save_label(self, label):
-        data_addr = self.size()
+    def save_label(self, label, value=None):
+        if not value:
+            value = self.size()
         
-        self.labelsAddress[label] = data_addr
+        self.labelsValues[label] = value
 
     def save(self, value):
-        self.RAMmemory.append(value)
+        self.ROMmemory.append(value)
     
     def size(self):
-        return len(self.RAMmemory)
+        return len(self.ROMmemory)
     
     def get_label_index(self, label):
-        return self.labelsAddress[label]
+        return self.labelsValues[label]
 
     def convert_labels(self):
-        for word_arr in self.RAMmemory:
+        for word_arr in self.ROMmemory:
             word = word_arr[0]
             if len(word_arr) > 1:
+                print(word_arr)
                 label_addr = self.get_label_index(word_arr[1])
                 label_addr = label_addr << 1
                 word += label_addr
             self.hex_mem.append((hex(word)[2:]).zfill(4))
 
-    def save_RAM_content(self, file):
+    def save_ROM_content(self, file):
         f = open(file, "w")
         f.write("v2.0 raw\n")
         for word in self.hex_mem:
@@ -68,13 +70,12 @@ class RamMemory:
 
 class Assembler:
     section = None
-    variables = {}
 
-    RAM=None
+    ROM=None
 
-    chu_insts = ["lr", "jd", "jc", "dl", "i", "geu", "ton", "aton"]
-    deol_insts= ["lj", "ia", "ld", "ldi" "la", "jci", "dli", "ja", "dli", "dr", "cmp"]
-    jeon_insts= ["lja", "lda", "jai", "g","geb", "yibi", "yabi", "d", "dal", "cmpi"]
+    chu_insts = ["lr", "llj", "jd", "ld", "jc", "dl", "i", "geu", "ton", "aton"]
+    deol_insts= ["lj", "ia", "dli", "ldi" "la", "jci", "dli", "ja", "dli", "dr", "cmp", "yibi", "yabi",]
+    jeon_insts= ["lja", "kk", "lad", "lal","lj0", "lj1", "sal", "sj0", "sj1", "ldj0", "jai", "g","geb", "d", "dal", "cmpi", "lda", "end"]
     insts     = chu_insts + deol_insts + jeon_insts
     
     dtypes = [".word"]
@@ -85,7 +86,7 @@ class Assembler:
     TAB_REG=r"\t+"
 
     def __init__(self) -> None:
-        self.RAM = RamMemory()
+        self.ROM = ROMMemory()
 
     def execute(self, file):
         f = open(file, "r")
@@ -93,12 +94,15 @@ class Assembler:
 
         for line in f:
             self.handle_line(line)
-        
-        self.RAM.convert_labels()
 
         f.close()
 
-        self.RAM.save_RAM_content("out.mem")
+        print(self.ROM.labelsValues)
+        # print(self.ROM.)
+
+        self.ROM.convert_labels()
+
+        self.ROM.save_ROM_content("out.mem")
 
     def handle_line(self, line):
         line = line.strip()
@@ -134,7 +138,7 @@ class Assembler:
             if (not self.check_type(value, tokens[1])):
                 raise Exception("wrong type \"" + value + "\" in " + str(tokens) + " not " + tokens[1])
             
-        self.RAM.save_label(tokens[0][:-1])
+        self.ROM.save_label(tokens[0][:-1])
 
         for token in tokens[2:]:
             self.convert_data_to_memory(token, tokens[1])
@@ -154,7 +158,7 @@ class Assembler:
         if len(tokens) != 3 or tokens[1] != "=" or not self.check_type(tokens[2], ".word"):
             raise Exception("Correct syntax:: [Var name] = [Hex|Dec Value]")
         
-        self.variables[tokens[0]] = self.convert_value(tokens[2], ".word")
+        self.ROM.save_label(tokens[0], self.convert_data_to_memory(tokens[2], ".word"))
         
 
     def handle_insts(self, line):
@@ -165,7 +169,9 @@ class Assembler:
         if ((not is_label and tokens[0] not in self.insts)):
             raise Exception("Wrong syntax:: inst " + str(tokens[0]) )
         
-        if (not is_label):
+        if (is_label):
+            self.ROM.save_label(tokens[0][:-1])
+        else:
             try:
                 self.save_inst(*tokens)
             except Exception as e:
@@ -191,13 +197,13 @@ class Assembler:
         inst_word = inst_word << 4
         inst_word += int(immediate if immediate else '0')
 
-        self.RAM.save([inst_word])
+        self.ROM.save([inst_word])
         
         # first_part_inst = (inst_word & 0xFF00) >> 8
         # second_part_inst = (inst_word & 0x00FF)
 
-        # self.RAM.save(first_part_inst)
-        # self.RAM.save(second_part_inst)
+        # self.ROM.save(first_part_inst)
+        # self.ROM.save(second_part_inst)
 
         print("Chu-Inst: ", inst, r1, r2, immediate, ">>", bin(inst_word))
 
@@ -218,7 +224,7 @@ class Assembler:
         inst_word = inst_word << 7
         inst_word += self.convert_value(immediate, ".word")
 
-        self.RAM.save([inst_word])
+        self.ROM.save([inst_word])
 
         print("Deol-Inst: ", inst, r1, immediate, ">>", bin(inst_word))
 
@@ -226,21 +232,14 @@ class Assembler:
         opcode = self.get_opcode(inst)
 
         inst_word = opcode << 10
-        if immediate.isnumeric():
-            inst_word += int(immediate)
-            self.RAM.save([inst_word])
+        if immediate != None:
+            if immediate.isnumeric():
+                inst_word += int(immediate)
+                self.ROM.save([inst_word])
+            else:
+                self.ROM.save([inst_word, immediate])
         else:
-            self.RAM.save_label(immediate)
-            self.RAM.save([inst_word, immediate])
-            # label_i = self.RAM.get_label_index(immediate)
-            # inst_word += (label_i << 1)
-
-        # first_part_inst = (inst_word & 0xFF00) >> 8
-        # second_part_inst = (inst_word & 0x00FF)
-
-        # self.RAM.save(first_part_inst)
-        # self.RAM.save(second_part_inst)
-
+            self.ROM.save([inst_word])
 
         print("Jeon-Inst: ", inst, immediate, ">>", bin(inst_word))
 
@@ -261,7 +260,7 @@ class Assembler:
             or converted_value < -pow(2, 15)):
             raise Exception(converted_value + " cant be represent in 16 bits")
 
-        self.RAM.save([converted_value])
+        self.ROM.save([converted_value])
 
     def convert_value(self, value, type):
         if type == ".word":
@@ -278,9 +277,8 @@ class Assembler:
 if __name__ == "__main__":
     assembler = Assembler()
     assembler.execute("Bangtan.asm")
-    print(assembler.RAM.labelsAddress)
-    print(assembler.RAM.RAMmemory)
-    print(assembler.RAM.hex_mem)
-    # for byte in assembler.RAM.RAMmemory:
-        # print(bin(int(byte, 16)).zfill(8))
-        # print(byte)
+    print(assembler.ROM.ROMmemory)
+    # print(assembler.ROM.hex_mem)
+    for byte in assembler.ROM.hex_mem:
+        print(bin(int(byte, 16)).zfill(8))
+        print(byte)
