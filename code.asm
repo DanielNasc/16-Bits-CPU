@@ -41,6 +41,7 @@
         # load value from a address into a register
         ldr $x $y # x = VECTOR[I]
         # compare a register with accumulator and set specific flags
+        clc
         cmp $x
         # branch if carry clear 
         bcs next
