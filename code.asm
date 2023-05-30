@@ -20,7 +20,8 @@
     sta CURRENT_VALUE_ADDR_ADRESS
 
     # load value into accumulator
-    lda REMAINING_AMOUNT
+    laa ARRAY_SIZE
+    ldr $a $a
     # subtract immediate
     subi $a 1
     # store accumulator into memory
@@ -42,7 +43,7 @@
         # compare a register with accumulator and set specific flags
         cmp $x
         # branch if carry clear 
-        bcc next
+        bcs next
 
         # store x value into memory
         stx GREATER_ADDRESS
@@ -62,4 +63,5 @@
         # jump
         j loop
     end:
-        end
+        addi $a 1
+        j end

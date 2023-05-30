@@ -68,7 +68,7 @@ class Assembler:
     "end": 0b001111
 }
     dtypes = [".word"]
-    registers = ["$rm", *["$jn" + str(x) for x in range(0, 4+1)], "$jm", "$iu"]
+    registers = ["$zero", "$iu", "$jn0", "$jn1", "$sp", "$ps", "$bj", "$bb"]
 
     DEC_REG=r"^[0-9]+$"
     HEX_REG=r"^0x[0-9A-Fa-f]+$"
@@ -172,7 +172,8 @@ class Assembler:
         if (inst in self.chu_insts):
             self.save_chu_inst(inst, arg1, arg2, arg3)
         elif (inst in self.deol_insts):
-            self.save_deol_inst(inst, arg1)
+            
+            self.save_deol_inst(inst, arg1, arg2)
         elif (inst in self.jeon_insts):
             self.save_jeon_inst(inst, arg1)
 
@@ -196,19 +197,13 @@ class Assembler:
 
         print("Chu-Inst: ", inst, r1, r2, immediate, ">>", bin(inst_word))
 
-    def save_deol_inst(self, inst, immediate_r1):
+    def save_deol_inst(self, inst, r1, immediate):
+        if immediate == None: 
+            immediate = '0'
+
         opcode = self.get_opcode(inst)
 
         inst_word = opcode << 3
-        
-        immediate_r1 = immediate_r1.split("(")
-        immediate = immediate_r1[0]
-        # immediate($register) || $register
-        if len(immediate_r1) > 1:r1 = immediate_r1[1][:-1] 
-        else: 
-            r1 =immediate_r1[0]
-            immediate = '0'
-
         inst_word += self.get_register(r1)
         inst_word = inst_word << 7
         inst_word += self.convert_value(immediate, ".word")

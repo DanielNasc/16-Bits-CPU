@@ -40,4 +40,5 @@
 
         d loop
     end:
-        end
+        jci $iu 1
+        d end
