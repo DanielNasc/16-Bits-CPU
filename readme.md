@@ -61,6 +61,7 @@ O final da main deve usar a chamada de saída do sistema.
 | **bcc** (branch if carry clear) | **geb** | kaeli keullin bungi
 | **beqz** (branch if equal zero) | **yibi** | yeong imyeon bungi
 | **bnez** (branch if not equal zero) | **yabi** | yeongi anin gyeong-u bungi
+| **blt** (branch if less than accumulator) | **blt** | -
 | **move** | **i** | idonghada
 | **j** (jump) | **d** | doyag
 | **jr** | **dr** | -

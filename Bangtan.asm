@@ -25,9 +25,7 @@
         lal GREATER_ADDRESS
         lj1 CURRENT_VALUE_ADDR_ADRESS 
         llj $jn0 $jn1 
-        kk
-        cmp $jn0
-        geb next
+        blt $jn0 next
 
         sj0 GREATER_ADDRESS
     next:

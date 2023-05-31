@@ -46,7 +46,7 @@ class Assembler:
     ROM=None
 
     chu_insts = ["lr", "llj", "jd", "ld", "jc", "dl", "i", "geu", "ton", "aton"]
-    deol_insts= ["lj", "ia", "dli", "ldi" "la", "jci", "dli", "ja", "dli", "dr", "cmp", "yibi", "yabi",]
+    deol_insts= ["blt", "lj", "ia", "dli", "ldi" "la", "jci", "dli", "ja", "dli", "dr", "cmp", "yibi", "yabi",]
     jeon_insts= ["lja", "kk", "lad", "lal","lj0", "lj1", "sal", "sj0", "sj1", "ldj0", "jai", "g","geb", "d", "dal", "cmpi", "lda", "end"]
     insts     = chu_insts + deol_insts + jeon_insts
 
@@ -62,13 +62,14 @@ class Assembler:
     "lj1": 0b001001,
     "kk": 0b001010,
     "cmp": 0b001011,
-    "geb": 0b001100,
+    "blt": 0b001100,
     "dli": 0b001101,
     "d": 0b001110,
     "end": 0b001111
 }
     dtypes = [".word"]
     registers = ["$zero", "$iu", "$jn0", "$jn1", "$sp", "$ps", "$bj", "$bb"]
+    init_addr = 0
 
     DEC_REG=r"^[0-9]+$"
     HEX_REG=r"^0x[0-9A-Fa-f]+$"
@@ -257,6 +258,16 @@ class Assembler:
     def change_section(self, new_ctx):
         self.section = new_ctx
         print("New section >>", new_ctx)
+
+        # JUMP TO INIT ADDR: ignore data section in rom
+
+        if self.section == "data":
+            self.ROM.save([self.OPCODES["d"] << 10, "__init_addr__"]) # j __init_addr__
+        elif self.section == "text":
+            self.ROM.save_label("__init_addr__", self.init_addr) # init_addr = first instruction in text section
+        else:
+            self.init_addr = self.ROM.size() # first instruction in data section
+
 
 if __name__ == "__main__":
     assembler = Assembler()

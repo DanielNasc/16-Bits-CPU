@@ -40,11 +40,8 @@
         ldy CURRENT_VALUE_ADDR_ADRESS # y = *CURRENT_VALUE_ADDR_ADRESS
         # load value from a address into a register
         ldr $x $y # x = VECTOR[I]
-        # compare a register with accumulator and set specific flags
-        clc
-        cmp $x
-        # branch if carry clear 
-        bcs next
+        # # branch if x is less than the accumulator
+        blt $x next
 
         # store x value into memory
         stx GREATER_ADDRESS
