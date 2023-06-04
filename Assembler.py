@@ -26,12 +26,11 @@ class ROMMemory:
         for word_arr in self.ROMmemory:
             word = word_arr[0]
             if len(word_arr) > 1:
-                print(word_arr)
                 label_addr = self.get_label_index(word_arr[1])
-                label_addr = label_addr << 1
+                # label_addr = label_addr << 1
                 word += label_addr
             self.hex_mem.append((hex(word)[2:]).zfill(4))
-
+ 
     def save_ROM_content(self, file):
         f = open(file, "w")
         f.write("v2.0 raw\n")
@@ -148,7 +147,7 @@ class Assembler:
         if len(tokens) != 3 or tokens[1] != "=" or not self.check_type(tokens[2], ".word"):
             raise Exception("Correct syntax:: [Var name] = [Hex|Dec Value]")
         
-        self.ROM.save_label(tokens[0], self.convert_data_to_memory(tokens[2], ".word"))
+        self.ROM.save_label(tokens[0], self.convert_value(tokens[2], ".word"))
         
 
     def handle_insts(self, line):
