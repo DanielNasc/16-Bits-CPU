@@ -6,12 +6,17 @@ class ROMMemory:
     labelsValues = {}
     ROMmemory = []
     hex_mem = []
+    variables = []
 
     def save_label(self, label, value=None):
         if not value:
             value = self.size()
         
         self.labelsValues[label] = value
+
+    def save_variable(self, label, value):
+        self.variables.append(label)
+        self.save_label(label, value)
 
     def save(self, value):
         self.ROMmemory.append(value)
@@ -29,6 +34,9 @@ class ROMMemory:
                 label_addr = self.get_label_index(word_arr[1])
                 # label_addr = label_addr << 1
                 word += label_addr
+                if word_arr[1] in self.variables:
+                    # set most significant bit to 1
+                    word = word | 0b1000000000000000
             self.hex_mem.append((hex(word)[2:]).zfill(4))
  
     def save_ROM_content(self, file):
@@ -65,7 +73,8 @@ class Assembler:
     "dli": 0b001101,
     "d": 0b001110,
     "end": 0b001111
-}
+    }
+
     dtypes = [".word"]
     registers = ["$zero", "$iu", "$jn0", "$jn1", "$sp", "$ps", "$bj", "$bb"]
     init_addr = 0
@@ -147,7 +156,7 @@ class Assembler:
         if len(tokens) != 3 or tokens[1] != "=" or not self.check_type(tokens[2], ".word"):
             raise Exception("Correct syntax:: [Var name] = [Hex|Dec Value]")
         
-        self.ROM.save_label(tokens[0], self.convert_value(tokens[2], ".word"))
+        self.ROM.save_variable(tokens[0], self.convert_value(tokens[2], ".word"))
         
 
     def handle_insts(self, line):
@@ -271,8 +280,9 @@ class Assembler:
 if __name__ == "__main__":
     assembler = Assembler()
     assembler.execute("Bangtan.asm")
+    print(assembler.ROM.variables)
     print(assembler.ROM.ROMmemory)
     # print(assembler.ROM.hex_mem)
     for word in assembler.ROM.hex_mem:
-        print(bin(int(word, 16))[2:].zfill(8))
+        print(bin(int(word, 16))[2:].zfill(16))
         print(word)
