@@ -37,8 +37,8 @@ class MemManager:
     def get_label_index(self, label):
         return self.labelsValues[label]
 
-    def convert_labels(self):
-        for word_arr in self.ROMmemory:
+    def convert_labels(self, memory_type):
+        for word_arr in (self.ROMmemory if memory_type == "ROM" else self.RAMmemory):
             word = word_arr[0]
             if len(word_arr) > 1:
                 label_addr = self.get_label_index(word_arr[1])
@@ -47,12 +47,17 @@ class MemManager:
                 if word_arr[1] in self.variables:
                     # set most significant bit to 1
                     word = word | 0b1000000000000000
-            self.hex_rom_mem.append((hex(word)[2:]).zfill(4))
+            hex_value = (hex(word)[2:]).zfill(4)
+            if(memory_type == "ROM"):
+                self.hex_rom_mem.append(hex_value)
+            else:
+                self.hex_ram_mem.append(hex_value)
  
-    def save_ROM_content(self, file):
+    def save_content(self, file, memory_type):
         f = open(file, "w")
         f.write("v2.0 raw\n")
-        for word in self.hex_rom_mem:
+        
+        for word in (self.hex_rom_mem if memory_type == "ROM" else self.hex_ram_mem):
             f.write(word + " ")
         f.close()
 
@@ -63,16 +68,18 @@ class Assembler:
     MM=None
 
     chu_insts = ["slt", "ton", ]
-    deol_insts= ["toni", "ld", "dli", "jci"]
+    deol_insts= ["toni", "dli", "jci"]
     jeon_insts= ["d"]
-    insts     = chu_insts + deol_insts + jeon_insts
+    hobi_insts= ["yibi", "yabi", "ld"]
+    insts     = chu_insts + deol_insts + jeon_insts + hobi_insts
 
     OPCODES = {
-    "ld  ": 0b0000,
+    "ld": 0b0000,
     "yibi": 0b0001,
     "yabi": 0b0010,
     "slt": 0b0011,
     "ton": 0b0100,
+    "toni": 0b1001,
     "jci": 0b0101,
     "dli": 0b0110,
     "jc": 0b0111,   
@@ -80,7 +87,7 @@ class Assembler:
     }
 
     dtypes = [".word"]
-    registers = ["$zero", "jn0", "$jn1", "$jn2", "$jn3", "$sg0", "$sg1", "$sg2", "$sg3", "$sg4", "$sg5"
+    registers = ["$zero", "$jn0", "$jn1", "$jn2", "$jn3", "$jn4", "$sg0", "$sg1", "$sg2", "$sg3", "$sg4",
                 "$gp", "$sp", "$pp", "$bj", "$bb"]
     init_addr = 0
 
@@ -102,10 +109,13 @@ class Assembler:
 
         print(self.MM.labelsValues)
         # print(self.MM.)
+        print(self.MM.ROMmemory)
+        print(self.MM.RAMmemory)
+        self.MM.convert_labels("ROM")
+        self.MM.convert_labels("RAM")
 
-        self.MM.convert_labels()
-
-        self.MM.save_ROM_content("out.mem")
+        self.MM.save_content("rom.mem", "ROM")
+        self.MM.save_content("ram.mem", "RAM")
 
     def handle_line(self, line):
         line = line.strip()
@@ -184,19 +194,21 @@ class Assembler:
         if (inst in self.chu_insts):
             self.save_chu_inst(inst, arg1, arg2, arg3)
         elif (inst in self.deol_insts):
-            self.save_deol_inst(inst, arg1, arg2)
+            self.save_deol_inst(inst, arg1, arg2, arg3)
+        elif (inst in self.hobi_insts):
+            self.save_hobi_inst(inst, arg1, arg2)
         elif (inst in self.jeon_insts):
             self.save_jeon_inst(inst, arg1)
 
-    def save_chu_inst(self, inst, r1, r2, immediate):
+    def save_chu_inst(self, inst, r1, r2, r3):
         opcode = self.get_opcode(inst)
 
-        inst_word = opcode << 3
+        inst_word = opcode << 4 
         inst_word += self.get_register(r1)
-        inst_word = inst_word << 3
+        inst_word = inst_word << 4
         inst_word += self.get_register(r2)
         inst_word = inst_word << 4
-        inst_word += int(immediate if immediate else '0')
+        inst_word += self.get_register(r3)
 
         self.MM.save([inst_word], "ROM")
         
@@ -206,17 +218,19 @@ class Assembler:
         # self.MM.save(first_part_inst)
         # self.MM.save(second_part_inst)
 
-        print("Chu-Inst: ", inst, r1, r2, immediate, ">>", bin(inst_word))
+        print("Chu-Inst: ", inst, r1, r2, r3, ">>", bin(inst_word))
 
-    def save_deol_inst(self, inst, r1, immediate):
+    def save_deol_inst(self, inst, r1, r2, immediate):
         if immediate == None: 
             immediate = '0'
 
         opcode = self.get_opcode(inst)
 
-        inst_word = opcode << 3
+        inst_word = opcode << 4
         inst_word += self.get_register(r1)
-        inst_word = inst_word << 7
+        inst_word = opcode << 4
+        inst_word += self.get_register(r2)
+        inst_word = inst_word << 4
         try:
             inst_word += self.convert_value(immediate, ".word")
 
@@ -224,7 +238,7 @@ class Assembler:
         except:
             self.MM.save([inst_word, immediate], "ROM")
 
-        print("Deol-Inst: ", inst, r1, immediate, ">>", bin(inst_word))
+        print("Deol-Inst: ", inst, r1, r2, immediate, ">>", bin(inst_word))
 
     def save_jeon_inst(self, inst, immediate: str):
         opcode = self.get_opcode(inst)
@@ -240,6 +254,23 @@ class Assembler:
             self.MM.save([inst_word], "ROM")
 
         print("Jeon-Inst: ", inst, immediate, ">>", bin(inst_word))
+
+    def save_hobi_inst(self, inst, r1, immediate: str):
+        opcode = self.get_opcode(inst)
+
+        inst_word = opcode << 4
+        inst_word += self.get_register(r1)
+        inst_word = opcode << 8
+        if immediate != None:
+            if immediate.isnumeric():
+                inst_word += int(immediate)
+                self.MM.save([inst_word], "ROM")
+            else:
+                self.MM.save([inst_word, immediate], "ROM")
+        else:
+            self.MM.save([inst_word], "ROM")
+
+        print("Hobi-Inst: ", inst, r1, immediate, ">>", bin(inst_word))
 
     def get_opcode(self, inst):
         return self.OPCODES[inst]

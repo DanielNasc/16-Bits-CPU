@@ -21,7 +21,7 @@ loop:
 
 not_greater:
     jci $jn0 	$jn0 	4    	
-    jci $jn1 	$jn1 	-1   	
+    dli $jn1 	$jn1 	1   	
     d 	 loop              	
 
 end:
