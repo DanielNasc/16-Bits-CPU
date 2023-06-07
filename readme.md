@@ -3,9 +3,9 @@
 #### Formato das Instruções
 | Tipo de Instrução | OpCode | Registradores | Imediato |
 | :---------------: | :----: | :-----------: | :------: |
-| Chu-Format | 6 bits | 6 bits | 4 bits |
-| Deol-Format | 6 bits | 3 bits | 7 bits |
-| Jeon-Format | 6 bits | - | 10 bits |
+| Chu-Format | 4 bits | 12 bits | - |
+| Deol-Format | 4 bits | 8 bits | 4 bits |
+| Jeon-Format | 4 bits | - | 12 bits |
 
 ### Registradores
 8 registradores
@@ -16,7 +16,7 @@ Usando os nomes equivalentes (ver abaixo). Ex: $jn1, $iu
 | # do Reg. | Nome | Descrição |
 | :-------: | :--: | :-------: |
 | 0 | $zero | Sempre 0 |
-| 1 | $iu | Acumulador |
+| 1 | $jn0 | Acumulador |
 | 2 | $jn0 | Registrador de uso geral |
 | 3 | $jn1 | Registrador de uso geral |
 | 4 | $sp | Stack Pointer |

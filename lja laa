@@ -1,14 +1,19 @@
-lja laa     
-sal sta     
-lal lda     
-llj ldr     
-sj0 stx     
-jci addi    
-lj0 ldx     
-yabi bnez   
-lj1 ldy     
-kk clc  
-cmp cmp     
-geb bcs     
-dli subi    
-d j     
+la -> lj
+lw -> ld
+beqz -> yibi
+slt  -> slt
+bnez -> yabi
+or -> ton
+addi -> jci
+add -> jc
+j -> d
+
+lj
+ld
+yibi
+yabi
+slt
+ton
+jci
+jc
+d

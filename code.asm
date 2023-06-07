@@ -1,13 +1,12 @@
 .data
     ARRAY: .word 2 8 6 23 3 9 4
     ARRAY_SIZE: .word 7
-.vars
-    REMAINING_AMOUNT          = 0000
-    GREATER_ADDRESS           = 0002 # Adress of the greater element in the ARRAY
-    CURRENT_VALUE_ADDR_ADRESS = 0004
+    REMAINING_AMOUNT:          .word 7 
+    GREATER_ADDRESS:           .word 0
+    CURRENT_VALUE_ADDR_ADRESS: .word 0
 .text
     # load address into accumulator
-    laa ARRAY
+    
 
    # load value from a address into a register
     ldr $x $a # x = array[0]

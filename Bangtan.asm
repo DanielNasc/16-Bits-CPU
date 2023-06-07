@@ -1,42 +1,30 @@
 .data
     ARRAY: .word 2 8 6 23 3 9 4
     ARRAY_SIZE: .word 7
-.vars
-    REMAINING_AMOUNT          = 0000
-    GREATER_ADDRESS           = 0002 
-    CURRENT_VALUE_ADDR_ADRESS = 0004
+    REMAINING_AMOUNT:          .word 7 
+    GREATER_ADDRESS:           .word 0
+    CURRENT_VALUE_ADDR_ADRESS: .word 0
 .text
-    lja ARRAY
-   
-    llj $jn0 $iu 
-    sj0 GREATER_ADDRESS 
+    toni  $jn0 $zero 	ARRAY       	
+    ld 	 $jn1 	ARRAY_SIZE     	
+    dli $jn1 	$jn1 	1   	
 
-    jci $iu 2 
-    sal CURRENT_VALUE_ADDR_ADRESS
+    dli 	 $jn2 	$jn0
+    jci $jn0 	$jn0 	4    	
+loop:
+    yibi $jn1  	end       	
+    dli 	 $jn3 	$jn0
 
-    lal REMAINING_AMOUNT
-    dli $iu 1
-    sal REMAINING_AMOUNT
+    slt  $jn4 	$jn3 	$jn2   	
+    yabi $jn4 	not_greater	
+    ton $jn2 	$jn3    $zero
 
-    loop:
-        lj0 REMAINING_AMOUNT
-        yabi $jn0 end
+not_greater:
+    jci $jn0 	$jn0 	4    	
+    jci $jn1 	$jn1 	-1   	
+    d 	 loop              	
 
-        lal GREATER_ADDRESS
-        lj1 CURRENT_VALUE_ADDR_ADRESS 
-        llj $jn0 $jn1 
-        blt $jn0 next
-
-        sj0 GREATER_ADDRESS
-    next:
-        jci $jn1 2 
-        sal CURRENT_VALUE_ADDR_ADRESS
-
-        lal REMAINING_AMOUNT
-        dli $iu 1
-        sal REMAINING_AMOUNT
-
-        d loop
-    end:
-        jci $iu 1
-        d end
+end:
+    
+    jci $jn0 $jn0 1
+    d end         		
