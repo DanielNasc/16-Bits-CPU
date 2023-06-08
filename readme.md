@@ -5,6 +5,7 @@
 | :---------------: | :----: | :-----------: | :------: |
 | Chu-Format | 4 bits | 12 bits | - |
 | Deol-Format | 4 bits | 8 bits | 4 bits |
+| Hobi-Format | 4 bits | 4 bits | 8 bits |
 | Jeon-Format | 4 bits | - | 12 bits |
 
 ### Registradores
