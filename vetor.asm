@@ -6,18 +6,20 @@
 	addi $t1 $zero 0
 	addi $t2 $zero 0
 while:
-    addi $s1 $zero 4
-	beq $t0 $s1 saida
-	lw $t3  $t0 vet
-	slt $s0 $t2 $t3
+	beq $t0 4 saida
+	lw $t3 vet($t1)
+	slt $s0 $t3 $t2
 	beq $s0 $zero maior
-	add $t2 $t3 $zero
+	addi $t1 $t1 4
+	addi $t0 $t0 1
+	j while
 maior:
-	addi $t1 $t1 1
+	add $t2 $t3 $zero
+	addi $t1 $t1 4
 	addi $t0 $t0 1
 	j while
 saida:
-	sw $t2 x
-    j saida
+	sw $t2 x($zero)
+
 	
 	
