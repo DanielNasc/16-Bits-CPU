@@ -139,7 +139,7 @@ desvia para o endereço dado se o conteúdo dos registradores registrador1 e reg
 
 compara o conteúdo dos registradores registrador1 e registrador2 e guarda 1 no registrador1 se o conteúdo do registrador1 for menor que o do registrador2, caso contrário guarda 0.
 
-### Tabela de Opcodes
+### Tabela de Opcodes e Sinais de Controle
 
 |Instruction|Type|Opcode|RegDest|Branch|MemRead|MemToReg|ALUOp|MemWrite|ALUSrc|RegWrite|jump|
 |-----------|----|------|-------|------|-------|--------|-----|--------|------|--------|----|
