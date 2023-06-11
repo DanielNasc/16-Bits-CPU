@@ -9,21 +9,29 @@
 | Jeon-Format | 4 bits | - | 12 bits |
 
 ### Registradores
-8 registradores
+16 registradores
 Os registradores são procedidos de $ nas instruções
 Duas formas de representação:
-Numero do registrador. $0 até $7
-Usando os nomes equivalentes (ver abaixo). Ex: $jn1, $iu
+Numero do registrador. $0 até $15
+Usando os nomes equivalentes (ver abaixo)
 | # do Reg. | Nome | Descrição |
 | :-------: | :--: | :-------: |
 | 0 | $zero | Sempre 0 |
-| 1 | $jn0 | Acumulador |
-| 2 | $jn0 | Registrador de uso geral |
-| 3 | $jn1 | Registrador de uso geral |
-| 4 | $sp | Stack Pointer |
-| 5 | $ps | Program Status |
-| 6 | $bj | Return Address |
-| 7 | $bb | Return Buffer |
+| 1 | $t0 | Temporário 0 |
+| 2 | $t1 | Temporário 1 |
+| 3 | $t2 | Temporário 2 |
+| 4 | $t3 | Temporário 3 |
+| 5 | $s0 | Salvo 0 |
+| 6 | $s1 | Salvo 1 |
+| 7 | $s2 | Salvo 2 |
+| 8 | $s3 | Salvo 3 |
+| 9 | $s4 | Salvo 4 |
+| 10 | $s5 | Salvo 5 |
+| 11 | $gp | Ponteiro Global |
+| 12 | $sp | Ponteiro de Pilha |
+| 13 | $fp | Ponteiro de Frame |
+| 14 | $ra | Endereço de Retorno |
+
 
 ### Declaração de Dados
 Seção do programa identificado pela diretiva .data
@@ -40,235 +48,114 @@ O final da main deve usar a chamada de saída do sistema.
 
 | Nome da Instrução (MIPS) | Nome da Instrução (Bangtan) | Inspiração
 | :----------------------: | :-------------------------: | :--------: |
-| **la** (load address) | **lj** | lodeu juso
-| - | **lja** | -
 | **lw** (load word) | **ld** | lodeu dan-eo"
-| **lda** (load accumulator) | **lal** | lodeu A lejiseuteo
-| **ldx** (load register x) | **lj0** | lodeu JN0 lejiseuteo
-| **ldy** (load register jn1) | **lj1** | lodeu JN1 lejiseuteo
-| **ldr** (load from address in register) | **llj** | lejiseuteo lodeu juso
-| - (load from accumulator) | **la** | load into accumulator
 | **sw** (store word)| **jd** | jeojang dan-eo
-| **sta** (store accumulator) | **sal** | seuto-eo A lejiseuteo
-| **stx** (store register x) | **sj0** | seuto-eo JN0 lejiseuteo
-| **sty** (store register y) | **sj1** | seuto-eo JN1 lejiseuteo
-| - (store into accumulator) | **ja** | store into accumulator
-| - (store immediate into accumulator) | **jai** | store immediate into accumulator
-| **add** | **jc** | -
-| **addi** | **jci** | jeugsi chuga
+| **add** | **jc** | jeugsi chuga
+| **addi** | **jci** | -
 | **sub** | **dl** | deolda
 | **subi** | **dli** | -
-| **b** (branch) | **g** | -
-| **bcc** (branch if carry clear) | **geb** | kaeli keullin bungi
-| **beqz** (branch if equal zero) | **yibi** | yeong imyeon bungi
-| **bnez** (branch if not equal zero) | **yabi** | yeongi anin gyeong-u bungi
-| **blt** (branch if less than accumulator) | **blt** | -
-| **move** | **i** | idonghada
 | **j** (jump) | **d** | doyag
-| **jr** | **dr** | -
-| **jal** | **dal** | -
 | **and** | **geu** | geuligo
+| **andi** | **geui** | -
 | **or** | **ton** | ttoneun
+| **ori** | **toni** | -
 | **nor** | **aton** | -
-| - | **cmp** | comparator
-| - | **cmpi** | comparator with immediate 
-| **clc** (clear carry) | **kk** | keullieo kaeli
-
+| **xor** | **xton** | -
+| **beq** (branch if equal) | **jge** | jeongdang geuligo
+| **slt** (set less than) | **jg** | jeongdang geuligo
 
 ### Leitura/Escrita
 Acesso a memória RAM apenas com instruções de leitura e escrita.
 Todas outras instruções usam registradores como operando.
 
-#### Leitura/Escrita de endereçamento direto
+#### Leitura/Escrita de Dados
 ##### Leitura:
-- `ld registrador1, registrador2`
+- `ld registrador1 registrador2 offset`
 
-copia word(2 bytes) da posição da RAM dada pelo registrador2, para o registrador1.
-- `ldi registrador, valor`
-
-carrega o valor para o registrador de destino.
-- `la registrador`
-
-copia word (2 bytes) do acumulador($iu), para o registrador dado.
+copia word(2 bytes) da posição da RAM dada pelo registrador2 somado ao offset, para o registrador1.
 
 ##### Escrita:
-- `jd registrador, posição_da_RAM`
+- `jd registrador1 endereço`
 
-escreve a word do registrador dado na posição da RAM dada.
-- `ja registrador`
+copia word(2 bytes) do registrador1 para a posição da RAM dada pelo endereço.
 
-copia word (2 bytes) do registrador dado, para o acumulador($iu).
-- `jai valor`
+### Instruções Aritméticas
+#### Instruções Aritméticas
+- `jc registrador1 registrador2 registrador3`
 
-carrega o valor para o acumulador($iu).
+soma o conteúdo dos registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-##### Exemplo:
-```assembly
-.data
-    var1:   .word   23
-    
-.text
-main:
-    ld  $jn0,   var1    # carrega o conteúdo de var1 em $jn0.
-    ldi $jn1,   8       # $jn1 = 8
-    la  $jn0            # carrega o conteúdo do acumulador($iu) em $jn0.
-    jd  $jn1,   var1    # carrega o conteúdo de $jn1 em var1.
-    ja  $jn0            # carrega o conteúdo de $jn0 em $iu(acumulador).
-    jai 7               # $iu(acumulador) = 7
-```
-#### Leitura/Escrita de endereçamento indireto e por base 
-##### Leitura
-- `lj registrador, label`
+- `jci registrador1 registrador2 imediato`
 
-copia o endereço do label na    memória para o registrador dado.
-- `lja label`
+soma o conteúdo do registrador registrador2 com o imediato e guarda o resultado no registrador1.
 
-copia o endereço do label na memória para o acumulador($iu).
-- **Endereçamento indireto**
+- `dl registrador1 registrador2 registrador3`
 
-`ld registrador1, (registrador2)`
-carrega a word que está no endereço dado pelo registrador2, para o registrador1.
-- **Endereçamento por base**
+subtrai o conteúdo dos registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-`ld registrador1, offset(registrador2)`
-carrega a word que está no endereço (registrador2 + offset) para o registrador1.
-**obs: o offset pode ser negativo**
-- **Endereçamento indireto (acumulador)**
+- `dli registrador1 registrador2 imediato`
 
-`la (registrador)`
-carrega a word que está no acumulador($iu), para o endereço dado pelo registrador.
-- **Endereçamento por base (acumulador)**
+subtrai o conteúdo do registrador registrador2 com o imediato e guarda o resultado no registrador1.
 
-`la offset(registrador)`
-carrega a word que está no acumulador($iu), para o endereço (registrador + offset).
-**obs: o offset pode ser negativo**
+#### Instruções Lógicas
 
-##### Escrita
-- **Endereçamento indireto**
+- `geu registrador1 registrador2 registrador3`
 
-`jd registrador1, (registrador2)`
-copia a word no registrador1 para posição de memória de endereço dado pelo registrador2.
-- **Endereçamento por base (acumulador)**
+faz a operação lógica AND entre os registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-`jd registrador1, offset(registrador2)`
-copia a word no registrador1 para posição de memória de endereço dado por (registrador2 + offset).
-**obs: o offset pode ser negativo**
-- **Endereçamento indireto**
+- `geui registrador1 registrador2 imediato`
 
-`ja (registrador)`
-copia a word que está na posição de memória dada pelo registrador, para o do acumulador($iu).
-- **Endereçamento por base (acumulador)**
-`ja offset(registrador)`
+faz a operação lógica AND entre o registrador registrador2 e o imediato e guarda o resultado no registrador1.
 
-copia a word que está na posição de memória (registrador + offset), para o do acumulador($iu).
-**obs: o offset pode ser negativo**
+- `ton registrador1 registrador2 registrador3`
 
-#### Movimentação
-- `i registrador0, registrador1`
+faz a operação lógica OR entre os registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-copia o valor do registrador1 para o registrador0.
+- `toni registrador1 registrador2 imediato`
 
-##### Exemplo:
-```assembly
-    i   $jn0,   $jn1    #$jn0 = $jn1
-```
-#### Aritméticas
-Todos operandos são registradores
-- `jc registrador1, registrador2`
+faz a operação lógica OR entre o registrador registrador2 e o imediato e guarda o resultado no registrador1.
 
-salva o resultado da soma do registrador1 com o registrador2 no acumulador($iu).
-##### Exemplo:
-```assembly
-    jc   $jn0,   $jn1    #$iu = $jn0 + $jn1
-```
-- `jci registrador, imediato`
+- `aton registrador1 registrador2 registrador3`
 
-salva o resultado da soma do registrador com o imediato no acumulador($iu).
-##### Exemplo:
-```assembly
-    jci   $jn0,    4    #$iu = $jn0 + 4
-    jci   $jn1,    -7    #$iu = $jn1 + (-7)
-```
-- `dl registrador1, registrador2`
+faz a operação lógica NOR entre os registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-salva o resultado da subtração do registrador1 com o registrador2 no acumulador($iu).
-##### Exemplo:
-```assembly
-    dl   $jn0,   $jn1    #$iu = $jn0 - $jn1
-```
-- `dli registrador, imediato`
+- `xton registrador1 registrador2 registrador3`
 
-salva o resultado da subtração do registrador com o imediato no acumulador($iu).
-##### Exemplo:
-```assembly
-    dli   $jn0,    4    #$iu = $jn0 - 4
-    dli   $jn1,    -7    #$iu = $jn1 - (-7)
-```
-#### Lógicas
-- `geu registrador1, registrador2`
+faz a operação lógica XOR entre os registradores registrador2 e registrador3 e guarda o resultado no registrador1.
 
-guarda o resultado da operação lógica correspondente ao AND entre o registrador1 e o registrador2 no acumulador($iu).
-- `ton registrador1, registrador2`
+#### Instruções de Desvio
 
-guarda o resultado da operação lógica correspondente ao OR entre o registrador1 e o registrador2 no acumulador($iu).
-- `aton registrador1, registrador2`
+- `d endereço`
 
-guarda o resultado da operação lógica correspondente ao NOR entre o registrador1 e o registrador2 no acumulador($iu).
+desvia para o endereço dado.
 
-#### Desvios
-#### Desvio Incondicional
-- `g label`
+- `jge registrador1 registrador2 endereço`
 
-muda o registrador PC(registrador que guarda o endereço da próxima instrução
-a ser executada) para o valor do label.
-- `d label`
+desvia para o endereço dado se o conteúdo dos registradores registrador1 e registrador2 forem iguais.
 
-muda o registrador PC(registrador que guarda o endereço da próxima instrução
-a ser executada) para o valor do label.
-- `dr registrador`
+#### Instrução de Comparação
 
-muda o registrador PC(registrador que guarda o endereço da próxima instrução
-a ser executada) para o endereço contido no registrador.
+- `jg registrador1 registrador2`
 
-#### Desvio Condicional
-- `yibi label`
+compara o conteúdo dos registradores registrador1 e registrador2 e guarda 1 no registrador1 se o conteúdo do registrador1 for menor que o do registrador2, caso contrário guarda 0.
 
-Desvia para a label, se: a flag zero estiver setada.
-- `yabi label`
+### Tabela de Opcodes
 
-Desvia para a label, se: a flag zero não estiver setada.
-- `geb label`
-
-Desvia para a label, se: a carry flag estiver setada.
-
-#### Chamada de subrotina
-- `dal label`
-
-desvia para o label da subrotina e copia o PC para o registrador RA.
-- `dr ra`
-
-desvia para o endereço contido em RA usado para fazer o retorno da subrotina para o programa.
-**Obs: se uma subrotina for chamar outra subrotina, ou é recursiva, o endereço em RA
-será sobrescrito, ele deveria então ser empilhado para que ele possa ser preservado e recuperado ao termino das chamadas para dar continuidade ao programa normalmente.**
-
-#### Alterador de Flags
-- `cmp registrador`
-
-Compara o valor no registrador dado com o valor no acumulador($iu) utilizando a aperação aritmética de soma, alterando as flags com base no resultado.
-- `cmpi valor`
-
-Compara o valor dado com o valor do acumulador($iu) utilizando operações aritméticas de soma e subtração, alterando as flags com base no resultado.
-
-#### Flags
-`Zero` : setada se registrador e o acumulador forem iguais.
-`Carry` : setada se o registrador for maior ou igual ao acumulador.
-
-### Controle da ALU
-| Instruction Opcode | Opcode | ALUOp | Instruction Operation | Desired ALU Action | ALU Control Input |
-| :---------------: | :-----: | :--: | :-------------: | :-------: | :-----: |
-| Deol-Format | - | 01 | lj | add | 0010 |
-| Jeon-Format | - | 10 | lja | add | 0010 |
-
-
-
-
+|Instruction|Type|Opcode|RegDest|Branch|MemRead|MemToReg|ALUOp|MemWrite|ALUSrc|RegWrite|jump|
+|-----------|----|------|-------|------|-------|--------|-----|--------|------|--------|----|
+|add        |chu |0b0000|1      |0     |0      |0       |11   |0       |0     |1       |0   |
+|sub        |chu |0b0001|1      |0     |0      |0       |100  |0       |0     |1       |0   |
+|and        |chu |0b0010|1      |0     |0      |0       |0    |0       |0     |1       |0   |
+|or         |chu |0b0011|1      |0     |0      |0       |1    |0       |0     |1       |0   |
+|nor        |chu |0b0100|1      |0     |0      |0       |0   |0       |0     |1       |0   |
+|xor        |chu |0b1110|1      |0     |0      |0       |11   |0       |0     |1       |0   |
+|lw         |deol|0b0101|0      |0     |1      |1       |11   |0       |1     |1       |0   |
+|sw         |deol|0b0110|x      |0     |0      |0       |11   |1       |1     |0       |0   |
+|beq        |deol|0b0111|x      |1     |0      |0       |100  |0       |0     |0       |0   |
+|slt        |chu |0b1000|1      |0     |0      |0       |101  |0       |0     |1       |0   |
+|addi       |deol|0b1001|0      |0     |0      |0       |11   |0       |1     |1       |0   |
+|subi       |deol|0b1010|0      |0     |0      |0       |100  |0       |1     |1       |0   |
+|ori        |deol|0b1011|0      |0     |0      |0       |1    |0       |1     |1       |0   |
+|sll        |deol|0b1100|0      |0     |0      |0       |     |        |      |        |    |
+|srl        |deol|0b1101|0      |0     |0      |0       |     |        |      |        |    |
+|j          |jeon|0b1111|x      |0     |0      |0       |11   |0       |x     |0       |1   |
