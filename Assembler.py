@@ -74,21 +74,21 @@ class Assembler:
     insts     = chu_insts + deol_insts + jeon_insts + hobi_insts
 
     OPCODES = {
-    "add": 0b0000,
-    "sub": 0b0001,
-    "and": 0b0010,
-    "or": 0b0011,
-    "nor": 0b0100,
-    "xor": 0b1110,
-    "lw": 0b0101,
-    "sw": 0b0110,
-    "beq": 0b0111,
-    "slt": 0b1000,
-    "addi": 0b1001,
-    "subi": 0b1010,
-    "ori": 0b1011,
-    "andi": 0b1100,
-    "j": 0b1111
+    "jc": 0b0000,
+    "dl": 0b0001,
+    "geu": 0b0010,
+    "ton": 0b0011,
+    "aton": 0b0100,
+    "xton": 0b1110,
+    "ld": 0b0101,
+    "jd": 0b0110,
+    "jge": 0b0111,
+    "jg": 0b1000,
+    "jci": 0b1001,
+    "dli": 0b1010,
+    "toni": 0b1011,
+    "geui": 0b1100,
+    "d": 0b1111
     }
 
     dtypes = [".word"]
