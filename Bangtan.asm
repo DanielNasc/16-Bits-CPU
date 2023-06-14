@@ -2,22 +2,20 @@
 	vet: .word 13 20 422 100
 	x: .word 5
 .text 
-	addi $t0 $zero 0
-	addi $t1 $zero 0
-	addi $t2 $zero 0
+	jci $jn0 $yeong 0
+	jci $jn1 $yeong 0
+	jci $jn2 $yeong 0
 while:
-    addi $s1 $zero 4
-	beq $t0 $s1 saida
-	lw $t3  $t0 vet
-	slt $s0 $t2 $t3
-	beq $s0 $zero maior
-	add $t2 $t3 $zero
+    jci $sg1 $yeong 4
+	jge $jn0 $sg1 saida
+	ld $jn3 $jn0 vet
+	jg $sg0 $jn2 $jn3
+	jge $sg0 $yeong maior
+	jc $jn2 $jn3 $yeong
 maior:
-	addi $t1 $t1 1
-	addi $t0 $t0 1
-	j while
+	jci $jn1 $jn1 1
+	jci $jn0 $jn0 1
+	d while
 saida:
-	sw $t2 x
-    j saida
-	
-	
+	jd $jn2 x
+    d saida
