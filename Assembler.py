@@ -67,10 +67,10 @@ class Assembler:
 
     MM=None
 
-    chu_insts = ["add", "sub", "and", "or", "nor", "xor", "slt"]
-    deol_insts= ["lw", "beq", "addi", "subi", "ori"]
-    jeon_insts= ["j"]
-    hobi_insts= ["sw","yibi", "yabi", "ld"]
+    chu_insts = ["jc", "dl", "geu", "ton", "aton", "xton", "jg"]
+    deol_insts= ["ld", "jge", "jci", "dli", "toni", "geui"]
+    jeon_insts= ["d"]
+    hobi_insts= ["jd"]
     insts     = chu_insts + deol_insts + jeon_insts + hobi_insts
 
     OPCODES = {
@@ -92,7 +92,7 @@ class Assembler:
     }
 
     dtypes = [".word"]
-    registers = ["$zero", "$t0", "$t1", "$t2", "$t3", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$gp", "$sp", "$fp", "$ra"]
+    registers = ["$yeong", "$jn0", "$jn1", "$jn2", "$jn3", "$sg0", "$sg1", "$sg2", "$sg3", "$sg4", "$sg5", "$rm", "$jk", "$v", "$iu"]
     init_addr = 0
 
     DEC_REG=r"^[0-9]+$"
